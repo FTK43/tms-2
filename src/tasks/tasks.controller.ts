@@ -12,16 +12,25 @@ import {
   Query,
   ParseIntPipe,
   DefaultValuePipe,
+  UseGuards,
 } from '@nestjs/common';
 import { TasksService } from './tasks.service';
 import { CreateTaskDto } from './dto/create-task.dto';
 import { UpdateTaskDto } from './dto/update-task.dto';
 import { CacheInterceptor } from '@nestjs/cache-manager';
 import { CompleteManyDto } from './dto/complete-many.dto';
+import { CurrentUser } from '../common/current-user.decorator';
+import { ApiKeyGuard } from '../common/guards/api-key.guard';
+import { TaskOwnerOrAdminGuard } from '../common/guards/task-owner-or-admin.guard';
 
 @Controller('tasks')
 export class TasksController {
   constructor(private readonly tasks: TasksService) {}
+
+  @Get('whoami')
+  async getUser(@CurrentUser() user) {
+    return user ?? { message: 'no user' };
+  }
 
   @Get()
   @UseInterceptors(CacheInterceptor)
@@ -58,6 +67,7 @@ export class TasksController {
   }
 
   @Delete(':id')
+  @UseGuards(ApiKeyGuard)
   @HttpCode(204)
   async remove(@Param('id', new ParseUUIDPipe()) id: string) {
     await this.tasks.remove(id);
@@ -74,6 +84,7 @@ export class TasksController {
   }
 
   @Patch(':id')
+  @UseGuards(TaskOwnerOrAdminGuard)
   update(
     @Param('id', new ParseUUIDPipe()) id: string,
     @Body() dto: UpdateTaskDto,
@@ -81,3 +92,5 @@ export class TasksController {
     return this.tasks.update(id, dto);
   }
 }
+// testUser
+// 01648282-e123-4828-9226-0abef1225ede
