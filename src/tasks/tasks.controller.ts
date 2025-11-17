@@ -59,29 +59,23 @@ export class TasksController {
 
   @Delete(':id')
   @HttpCode(204)
-  remove(@Param('id', new ParseUUIDPipe()) id: string) {
-    this.tasks.remove(id);
+  async remove(@Param('id', new ParseUUIDPipe()) id: string) {
+    await this.tasks.remove(id);
   }
 
-  // @Patch(':id/complete')
-  // complete(@Param('id', new ParseUUIDPipe()) id: string) {
-  //   return this.tasks.complete(id);
-  // }
+  @Patch(':id/complete')
+  complete(@Param('id', new ParseUUIDPipe()) id: string) {
+    return this.tasks.complete(id);
+  }
 
   @Patch('complete')
-  completeMany() {
-    const ids = [
-      '01648282-e123-4828-9226-0abef1225ede',
-      '6ea0e3ad-cfa8-451c-85c5-f71e988dd8d4',
-      '8f619fff-9ba6-4c10-923b-1a671ea9584e',
-    ];
-
-    return this.tasks.completeMany(ids);
+  completeMany(@Body() dto: CompleteManyDto) {
+    return this.tasks.completeMany(dto.ids);
   }
 
   @Patch(':id')
   update(
-    @Param('id' /*, new ParseUUIDPipe()*/) id: string,
+    @Param('id', new ParseUUIDPipe()) id: string,
     @Body() dto: UpdateTaskDto,
   ) {
     return this.tasks.update(id, dto);
