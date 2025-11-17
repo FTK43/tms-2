@@ -1,29 +1,23 @@
-import { DynamicModule, forwardRef, Module } from '@nestjs/common';
+import { DynamicModule, Global, Module } from '@nestjs/common';
 import { AuthService } from './auth.service';
-import { TasksModule } from '../tasks/tasks.module';
-import { AuthCoreModule } from './auth.core.module';
+import { AUTH_OPTIONS, AuthModuleOptions } from './auth.constants';
 
-export const AUTH_OPTIONS = 'AUTH_OPTIONS';
-
-export interface AuthModuleOptions {
-  secret: string;
-  tokenPrefix?: string;
-}
-
-@Module({})
+@Global()
+@Module({
+  providers: [AuthService],
+  exports: [AuthService],
+})
 export class AuthModule {
   static forRoot(options: AuthModuleOptions): DynamicModule {
     return {
       module: AuthModule,
-      imports: [forwardRef(() => TasksModule), AuthCoreModule],
       providers: [
-        AuthService,
         {
           provide: AUTH_OPTIONS,
           useValue: options,
         },
       ],
-      exports: [AuthCoreModule],
+      exports: [AuthService],
     };
   }
 }
