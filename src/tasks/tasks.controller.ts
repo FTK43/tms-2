@@ -13,6 +13,7 @@ import {
   ParseIntPipe,
   DefaultValuePipe,
   UseGuards,
+  UsePipes,
 } from '@nestjs/common';
 import { TasksService } from './tasks.service';
 import { CreateTaskDto } from './dto/create-task.dto';
@@ -22,8 +23,14 @@ import { CompleteManyDto } from './dto/complete-many.dto';
 import { CurrentUser } from '../common/current-user.decorator';
 import { ApiKeyGuard } from '../common/guards/api-key.guard';
 import { TaskOwnerOrAdminGuard } from '../common/guards/task-owner-or-admin.guard';
+import { NormalizeTaskPipe } from '../common/pipes/normalize-task.pipe';
+import { TaskStatusValidationPipe } from '../common/pipes/task-status-validation.pipe';
+import { TaskStatus } from '../common/task-status.enum';
+import { LoggerInterceptor } from '../common/interceptors/logger.interceptor';
+import { ResponseTransformInterceptor } from '../common/interceptors/response-transform.interceptor';
 
 @Controller('tasks')
+@UseInterceptors(LoggerInterceptor, ResponseTransformInterceptor)
 export class TasksController {
   constructor(private readonly tasks: TasksService) {}
 
@@ -37,6 +44,7 @@ export class TasksController {
   async findAll(
     @Query('page', new DefaultValuePipe(1), ParseIntPipe) page: number,
     @Query('limit', new DefaultValuePipe(10), ParseIntPipe) limit: number,
+    @Query('status', TaskStatusValidationPipe) status?: TaskStatus,
   ) {
     const all = await this.tasks.findAll();
     const start = (page - 1) * limit;
@@ -62,6 +70,7 @@ export class TasksController {
 
   @Post()
   @HttpCode(201)
+  @UsePipes(NormalizeTaskPipe)
   create(@Body() dto: CreateTaskDto) {
     return this.tasks.create(dto);
   }
