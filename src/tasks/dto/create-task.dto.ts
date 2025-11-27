@@ -14,5 +14,6 @@ export class CreateTaskDto {
   completed?: boolean = false;
 
   @IsString()
+  @IsOptional()
   status?: string;
 }

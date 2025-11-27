@@ -7,6 +7,7 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
 import dbConfig from './config/db.config';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { UserContextMiddleware } from './common/middlewares/user-context.middleware';
+import { UsersModule } from './users/users.module';
 
 @Module({
   imports: [
@@ -32,6 +33,7 @@ import { UserContextMiddleware } from './common/middlewares/user-context.middlew
       secret: 'super-secret-key',
       tokenPrefix: 'Bearer',
     }),
+    UsersModule,
   ],
   controllers: [AppController],
   providers: [AppService],

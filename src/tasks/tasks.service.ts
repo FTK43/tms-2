@@ -1,4 +1,5 @@
 import {
+  ConflictException,
   ForbiddenException,
   Injectable,
   NotFoundException,
@@ -18,10 +19,18 @@ export class TasksService {
   ) {}
 
   async create(dto: CreateTaskDto): Promise<Task> {
+    const tasks = await this.findAll();
+    const existingTitles = tasks.map((t) => t.title);
+
+    if (existingTitles.includes(dto.title)) {
+      throw new ConflictException('Task with this title already exists');
+    }
+
     const task = this.taskRepo.create({
       title: dto.title,
       completed: dto.completed ?? false,
       ownerId: dto.userId,
+      // status: dto.status,
     });
 
     return this.taskRepo.save(task);
