@@ -6,8 +6,9 @@ import { AuthModule } from './auth/auth.module';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import dbConfig from './config/db.config';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import { UserContextMiddleware } from './common/middlewares/user-context.middleware';
 import { UsersModule } from './users/users.module';
+import { CacheModule } from '@nestjs/cache-manager';
+import { redisStore } from 'cache-manager-ioredis-yet';
 
 @Module({
   imports: [
@@ -28,11 +29,24 @@ import { UsersModule } from './users/users.module';
       },
     }),
 
-    TasksModule,
+    CacheModule.registerAsync({
+      isGlobal: true,
+      useFactory: async () => ({
+        store: await redisStore({
+          host: 'localhost',
+          port: 6379,
+        }),
+        ttl: 10,
+      }),
+    }),
+
     AuthModule.forRoot({
       secret: 'super-secret-key',
       tokenPrefix: 'Bearer',
     }),
+
+    TasksModule,
+
     UsersModule,
   ],
   controllers: [AppController],
