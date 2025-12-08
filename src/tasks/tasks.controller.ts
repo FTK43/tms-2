@@ -30,7 +30,11 @@ import { LoggerInterceptor } from '../common/interceptors/logger.interceptor';
 import { ResponseTransformInterceptor } from '../common/interceptors/response-transform.interceptor';
 
 @Controller('tasks')
-@UseInterceptors(LoggerInterceptor, ResponseTransformInterceptor)
+@UseInterceptors(
+  // CacheInterceptor,
+  LoggerInterceptor,
+  ResponseTransformInterceptor,
+)
 export class TasksController {
   constructor(private readonly tasks: TasksService) {}
 
@@ -40,7 +44,6 @@ export class TasksController {
   }
 
   @Get()
-  @UseInterceptors(CacheInterceptor)
   async findAll(
     @Query('page', new DefaultValuePipe(1), ParseIntPipe) page: number,
     @Query('limit', new DefaultValuePipe(10), ParseIntPipe) limit: number,
@@ -61,7 +64,6 @@ export class TasksController {
   }
 
   @Get(':id')
-  @UseInterceptors(CacheInterceptor)
   async findOne(@Param('id', new ParseUUIDPipe()) id: string) {
     const task = await this.tasks.findOne(id);
 
@@ -101,5 +103,3 @@ export class TasksController {
     return this.tasks.update(id, dto);
   }
 }
-// testUser
-// 01648282-e123-4828-9226-0abef1225ede

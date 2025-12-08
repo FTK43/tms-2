@@ -1,6 +1,7 @@
 import {
   ConflictException,
   ForbiddenException,
+  Inject,
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
@@ -9,6 +10,7 @@ import { CreateTaskDto } from './dto/create-task.dto';
 import { UpdateTaskDto } from './dto/update-task.dto';
 import { InjectRepository } from '@nestjs/typeorm';
 import { DataSource, In, Repository } from 'typeorm';
+import { Cache, CACHE_MANAGER } from '@nestjs/cache-manager';
 
 @Injectable()
 export class TasksService {
@@ -16,6 +18,7 @@ export class TasksService {
     @InjectRepository(Task)
     private readonly taskRepo: Repository<Task>,
     private readonly dataSource: DataSource,
+    @Inject(CACHE_MANAGER) private readonly cache: Cache,
   ) {}
 
   async create(dto: CreateTaskDto): Promise<Task> {
@@ -44,6 +47,16 @@ export class TasksService {
   }
 
   async findOne(id: string): Promise<Task> {
+    const key = `tasks:${id}`;
+
+    const cached = await this.cache.get<Task>(key);
+    if (cached) {
+      console.log('CACHE HIT', id);
+
+      return cached;
+    }
+
+    console.log('DB CALL', id);
     const task = await this.taskRepo.findOne({
       where: { id },
       withDeleted: false,
@@ -53,6 +66,7 @@ export class TasksService {
       throw new NotFoundException(`Task ${id} - not found`);
     }
 
+    await this.cache.set(key, task, 300000);
     return task;
   }
 
