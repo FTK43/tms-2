@@ -11,6 +11,8 @@ import { UpdateTaskDto } from './dto/update-task.dto';
 import { InjectRepository } from '@nestjs/typeorm';
 import { DataSource, In, Repository } from 'typeorm';
 import { Cache, CACHE_MANAGER } from '@nestjs/cache-manager';
+import { InjectQueue } from '@nestjs/bull';
+import type { Queue } from 'bull';
 
 @Injectable()
 export class TasksService {
@@ -19,7 +21,26 @@ export class TasksService {
     private readonly taskRepo: Repository<Task>,
     private readonly dataSource: DataSource,
     @Inject(CACHE_MANAGER) private readonly cache: Cache,
+
+    @InjectQueue('tasks')
+    private readonly tasksQueue: Queue,
   ) {}
+
+  private taskCacheKey(id: string) {
+    return `tasks:${id}`;
+  }
+
+  private async enqueueInvalidateTaskCache(taskId: string) {
+    await this.tasksQueue.add(
+      'invalidate-task-cache',
+      { taskId },
+      {
+        attempts: 5,
+        backoff: { delay: 1000, type: 'exponential' },
+        removeOnComplete: true,
+      },
+    );
+  }
 
   async create(dto: CreateTaskDto): Promise<Task> {
     const tasks = await this.findAll();
@@ -82,7 +103,11 @@ export class TasksService {
       completed: dto.completed ?? task.completed,
     });
 
-    return this.taskRepo.save(task);
+    const saved = await this.taskRepo.save(task);
+
+    this.enqueueInvalidateTaskCache(id);
+
+    return saved;
   }
 
   async remove(id: string): Promise<void> {
@@ -91,18 +116,26 @@ export class TasksService {
     if (!res.affected) {
       throw new NotFoundException('Task not found');
     }
+
+    this.enqueueInvalidateTaskCache(id);
   }
 
   async complete(id: string) {
     const task = await this.getOwnedTask(id);
 
-    if (task.completed) {
-      return task;
-    }
+    // if (task.completed) {
+    //   return task;
+    // }
 
     task.completed = true;
 
-    return this.taskRepo.save(task);
+    const saved = await this.taskRepo.save(task);
+
+    console.log("ID: ", id);
+
+    await this.enqueueInvalidateTaskCache(id);
+
+    return saved;
   }
 
   async completeMany(ids: string[]) {
@@ -127,6 +160,8 @@ export class TasksService {
         .execute();
 
       await runner.commitTransaction();
+
+      await Promise.all(ids.map((id) => this.enqueueInvalidateTaskCache(id)));
     } catch (e) {
       console.log(e);
 
@@ -136,16 +171,5 @@ export class TasksService {
       await runner.release();
     }
   }
-
-  toHateoas(task: Task) {
-    return {
-      ...task,
-      _links: {
-        self: { href: `/tasks/${task.id}` },
-        update: { href: `/tasks/${task.id}`, method: 'PATCH' },
-        delete: { href: `/tasks/${task.id}`, method: 'DELETE' },
-        complete: { href: `/tasks/${task.id}/complete`, method: 'PATCH' },
-      },
-    };
-  }
 }
+// 01648282-e123-4828-9226-0abef1225ede
