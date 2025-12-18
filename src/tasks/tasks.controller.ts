@@ -14,6 +14,8 @@ import {
   DefaultValuePipe,
   UseGuards,
   UsePipes,
+  BadRequestException,
+  UploadedFile,
 } from '@nestjs/common';
 import { TasksService } from './tasks.service';
 import { CreateTaskDto } from './dto/create-task.dto';
@@ -28,6 +30,8 @@ import { TaskStatusValidationPipe } from '../common/pipes/task-status-validation
 import { TaskStatus } from '../common/task-status.enum';
 import { LoggerInterceptor } from '../common/interceptors/logger.interceptor';
 import { ResponseTransformInterceptor } from '../common/interceptors/response-transform.interceptor';
+import { FileStorageService } from '../file-storage/file-storage.service';
+import { FileInterceptor } from '@nestjs/platform-express';
 
 @Controller('tasks')
 @UseInterceptors(
@@ -36,7 +40,10 @@ import { ResponseTransformInterceptor } from '../common/interceptors/response-tr
   ResponseTransformInterceptor,
 )
 export class TasksController {
-  constructor(private readonly tasks: TasksService) {}
+  constructor(
+    private readonly tasks: TasksService,
+    private readonly fileStorage: FileStorageService,
+  ) {}
 
   @Get('whoami')
   async getUser(@CurrentUser() user) {
@@ -101,5 +108,32 @@ export class TasksController {
     @Body() dto: UpdateTaskDto,
   ) {
     return this.tasks.update(id, dto);
+  }
+
+  @Post('import-csv')
+  @UseInterceptors(
+    FileInterceptor('file', {
+      limits: { fileSize: 10 * 1024 * 1024 },
+      fileFilter: (_req, file, cb) => {
+        const ok =
+          file.mimetype === 'text/csv' ||
+          file.mimetype === 'application/vnd.ms-excel';
+
+        if (!ok) {
+          return cb(
+            new BadRequestException('Only CSV file are allowed'),
+            false,
+          );
+        }
+        cb(null, true);
+      },
+    }),
+  )
+  async importCsv(@UploadedFile() file: Express.Multer.File) {
+    if (!file) {
+      throw new BadRequestException('File is required');
+    }
+
+    return this.fileStorage.saveToLocal(file, 'csv');
   }
 }

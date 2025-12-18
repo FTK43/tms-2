@@ -10,6 +10,7 @@ import { UsersModule } from './users/users.module';
 import { CacheModule } from '@nestjs/cache-manager';
 import { redisStore } from 'cache-manager-ioredis-yet';
 import { BullModule } from '@nestjs/bull';
+import { FileStorageModule } from './file-storage/file-storage.module';
 import KeyvRedis from '@keyv/redis';
 
 @Module({
@@ -54,6 +55,8 @@ import KeyvRedis from '@keyv/redis';
     TasksModule,
 
     UsersModule,
+
+    FileStorageModule,
   ],
   controllers: [AppController],
   providers: [AppService],
