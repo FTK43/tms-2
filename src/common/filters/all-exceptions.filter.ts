@@ -23,22 +23,22 @@ export class AllExceptionsFilter implements ExceptionFilter {
 
     const exceptionResponse = isHttpException ? exception.getResponse() : null;
 
-    this.logger.error(
-      `Error on ${request.method} ${request.url}`,
-      (exception as any)?.stack || String(exception),
-    );
+    // this.logger.error(
+    //   `Error on ${request.method} ${request.url}`,
+    //   (exception as any)?.stack || String(exception),
+    // );
 
     const errorResponse = {
       success: false,
       timestamp: new Date().toISOString(),
-      path: request.url,
-      method: request.method,
+      // path: request.url,
+      // method: request.method,
       statusCode: status,
       message: this.normalizeMsg(exceptionResponse),
       error: this.extractErrorCode(exceptionResponse),
     };
 
-    response.status(status).json(errorResponse);
+    // response.status(status).json(errorResponse);
   }
 
   private normalizeMsg(exceptionResponse: unknown) {
