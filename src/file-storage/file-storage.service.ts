@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { randomUUID } from 'crypto';
 import { promises as fs } from 'fs';
-import path, { resolve } from 'path';
+import * as path from 'path';
 import { Worker } from 'worker_threads';
 
 export type StoredFile = {
