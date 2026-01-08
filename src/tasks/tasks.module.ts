@@ -7,6 +7,7 @@ import { BullModule } from '@nestjs/bull';
 import { TasksCacheProcessor } from './tasks-cache.processor';
 import { FileStorageModule } from '../file-storage/file-storage.module';
 import { TasksResolver } from './tasks.resolver';
+import { TaskByIdLoader } from './tasks-by-id.loader';
 
 @Module({
   imports: [
@@ -15,7 +16,7 @@ import { TasksResolver } from './tasks.resolver';
     FileStorageModule,
   ],
   controllers: [TasksController],
-  providers: [TasksService, TasksResolver, TasksCacheProcessor],
+  providers: [TasksService, TasksResolver, TaskByIdLoader, TasksCacheProcessor],
   exports: [TasksService],
 })
 export class TasksModule {}

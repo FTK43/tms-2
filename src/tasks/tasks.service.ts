@@ -131,7 +131,7 @@ export class TasksService {
 
     const saved = await this.taskRepo.save(task);
 
-    console.log("ID: ", id);
+    console.log('ID: ', id);
 
     await this.enqueueInvalidateTaskCache(id);
 
@@ -171,5 +171,15 @@ export class TasksService {
       await runner.release();
     }
   }
+
+  async findByIds(ids: string[]): Promise<Task[]> {
+    const tasks = await this.taskRepo.find({
+      where: { id: In(ids) },
+      withDeleted: false,
+    });
+
+    const map = new Map(tasks.map((t) => [t.id, t]));
+
+    return ids.map((id) => map.get(id)).filter(Boolean);
+  }
 }
-// 01648282-e123-4828-9226-0abef1225ede

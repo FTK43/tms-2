@@ -3,10 +3,14 @@ import { TaskType } from './task.type';
 import { TasksService } from './tasks.service';
 import { CreateTaskInput } from './create-task.input';
 import { UpdateTaskInput } from './update-task.input';
+import { TaskByIdLoader } from './tasks-by-id.loader';
 
 @Resolver(() => TaskType)
 export class TasksResolver {
-  constructor(private readonly tasksService: TasksService) {}
+  constructor(
+    private readonly tasksService: TasksService,
+    private readonly taskByIdLoader: TaskByIdLoader,
+  ) {}
 
   @Query(() => [TaskType], { name: 'tasks' })
   findAll() {
@@ -15,7 +19,8 @@ export class TasksResolver {
 
   @Query(() => TaskType, { name: 'task' })
   findOne(@Args('id', { type: () => ID }) id: string) {
-    return this.tasksService.findOne(id);
+    // return this.tasksService.findOne(id);
+    return this.taskByIdLoader.loader.load(id);
   }
 
   @Mutation(() => TaskType)
