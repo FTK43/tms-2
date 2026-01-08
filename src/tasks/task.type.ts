@@ -1,4 +1,5 @@
 import { Field, ID, ObjectType } from '@nestjs/graphql';
+import { UserType } from '../users/user.type';
 
 @ObjectType()
 export class TaskType {
@@ -13,4 +14,10 @@ export class TaskType {
 
   @Field()
   completed: boolean;
+
+  @Field(() => ID)
+  ownerId: string;
+
+  @Field(() => UserType, { nullable: true })
+  owner?: UserType | null;
 }

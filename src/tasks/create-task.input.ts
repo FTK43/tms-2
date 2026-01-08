@@ -9,7 +9,7 @@ export class CreateTaskInput {
   title: string;
 
   @Field()
-  @MinLength(3)
+  @MinLength(2)
   @IsString()
   userId: string;
 

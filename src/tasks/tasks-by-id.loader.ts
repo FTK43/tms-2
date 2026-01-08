@@ -1,6 +1,7 @@
 import { Injectable, Scope } from '@nestjs/common';
 import { TasksService } from './tasks.service';
-import DataLoader from 'dataloader';
+// eslint-disable-next-line @typescript-eslint/no-require-imports
+import DataLoader = require('dataloader');
 import { Task } from './task.entity';
 
 @Injectable({ scope: Scope.REQUEST })

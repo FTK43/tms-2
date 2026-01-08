@@ -16,4 +16,9 @@ export class UpdateTaskInput {
   @IsBoolean()
   @IsOptional()
   completed?: boolean;
+
+  @Field({ nullable: true })
+  @IsString()
+  @IsOptional()
+  ownerId?: string;
 }

@@ -101,6 +101,7 @@ export class TasksService {
     this.taskRepo.merge(task, {
       title: dto.title ?? task.title,
       completed: dto.completed ?? task.completed,
+      ownerId: dto.ownerId ?? task.ownerId,
     });
 
     const saved = await this.taskRepo.save(task);
