@@ -131,7 +131,7 @@ export class TasksService {
 
     const saved = await this.taskRepo.save(task);
 
-    console.log("ID: ", id);
+    console.log('ID: ', id);
 
     await this.enqueueInvalidateTaskCache(id);
 
@@ -172,4 +172,3 @@ export class TasksService {
     }
   }
 }
-// 01648282-e123-4828-9226-0abef1225ede
