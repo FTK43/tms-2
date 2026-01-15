@@ -2,6 +2,7 @@ import 'dotenv/config';
 
 import { DataSource } from 'typeorm';
 import { Task } from '../tasks/task.entity';
+import { join } from 'path';
 
 const base = {
   type: 'postgres' as const,
@@ -15,6 +16,6 @@ const base = {
 export default new DataSource({
   ...base,
   entities: [Task],
-  migrations: ['src/migrations/*{.ts,.js}'],
+  migrations: [join(__dirname, '..', 'migrations', '*{.ts,.js}')],
   synchronize: false,
 });

@@ -9,8 +9,16 @@ async function seed() {
   const count = await repo.count();
   if (count === 0) {
     await repo.save([
-      repo.create({ title: 'seed task 1', ownerId: 'u1', completed: false }),
-      repo.create({ title: 'seed task 2', ownerId: 'u2', completed: true }),
+      repo.create({
+        title: 'Seed task 1',
+        completed: false,
+        ownerId: '11111111-1111-1111-1111-111111111111',
+      }),
+      repo.create({
+        title: 'Seed task 2',
+        completed: true,
+        ownerId: '22222222-2222-2222-2222-222222222222',
+      }),
     ]);
   }
 

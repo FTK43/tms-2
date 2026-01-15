@@ -28,7 +28,7 @@ services:
       DB_NAME: mydb2
       REDIS_HOST: redis
       REDIS_PORT: 6379
-      NODE_ENV: development
+      NODE_ENV: production
     ports:
       - "3000:3000"
     depends_on:
