@@ -1,0 +1,36 @@
+version: "3.9"
+
+services:
+  db:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_DB: mydb2
+      POSTGRES_USER: myuser2
+      POSTGRES_PASSWORD: qwerty
+    ports:
+      - "5432:5432"
+
+  redis:
+    image: redis:7-alpine
+    ports:
+      - "6379:6379"
+
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    environment:
+      PORT: 3000
+      DB_HOST: db
+      DB_PORT: 5432
+      DB_USER: myuser2
+      DB_PASS: qwerty
+      DB_NAME: mydb2
+      REDIS_HOST: redis
+      REDIS_PORT: 6379
+      NODE_ENV: development
+    ports:
+      - "3000:3000"
+    depends_on:
+      - db
+      - redis
