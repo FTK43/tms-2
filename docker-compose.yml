@@ -3,10 +3,12 @@ version: "3.9"
 services:
   db:
     image: postgres:16-alpine
+    env_file:
+      - .env.docker
     environment:
-      POSTGRES_DB: mydb2
-      POSTGRES_USER: myuser2
-      POSTGRES_PASSWORD: qwerty
+      POSTGRES_DB: ${DB_NAME}
+      POSTGRES_USER: ${DB_USER}
+      POSTGRES_PASSWORD: ${DB_PASS}
     ports:
       - "5432:5432"
     volumes:
@@ -16,7 +18,7 @@ services:
     image: redis:7-alpine
     ports:
       - "6379:6379"
-    command: ["redis-server", "--append-only", "yes"]
+    command: ["redis-server", "--appendonly", "yes"]
     volumes:
       - redisdata:/data
 
@@ -24,16 +26,18 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
+    env_file:
+      - .env.docker
     environment:
-      PORT: 3000
-      DB_HOST: db
-      DB_PORT: 5432
-      DB_USER: myuser2
-      DB_PASS: qwerty
-      DB_NAME: mydb2
-      REDIS_HOST: redis
-      REDIS_PORT: 6379
-      NODE_ENV: production
+      PORT: ${PORT}
+      DB_HOST: ${DB_HOST}
+      DB_PORT: ${DB_PORT}
+      DB_USER: ${DB_USER}
+      DB_PASS: ${DB_PASS}
+      DB_NAME: ${DB_NAME}
+      REDIS_HOST: ${REDIS_HOST}
+      REDIS_PORT: ${REDIS_PORT}
+      NODE_ENV: ${NODE_ENV}
     ports:
       - "3000:3000"
     #volumes:
